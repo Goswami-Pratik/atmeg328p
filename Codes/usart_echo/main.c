@@ -4,6 +4,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <stdbool.h>
 
 #define BAUDRATE 9600
 #define BAUD_PRESCALLER ((F_CPU / (BAUDRATE * 16UL)) - 1)
@@ -11,6 +12,8 @@
 void USART_init(void);
 void UART_putc(unsigned char data);
 char UART_getc(void);
+bool can_read();
+bool can_write();
 
 uint16_t volatile delay_in_ms = 1000;
 
@@ -39,8 +42,7 @@ void USART_init(void)
 char UART_getc(void)
 {
 	// wait for data
-	while (!(UCSR0A & (1 << RXC0)))
-		;
+	while (!can_read());
 
 	// return data
 	return UDR0;
@@ -51,8 +53,18 @@ void UART_putc(unsigned char data)
 	if (data == 0x00)
 		return;
 
-	while (!(UCSR0A & (1 << UDRE0)))
-		; // wait to be ready
+	// wait to be ready
+	while (!can_write()); 
 
 	UDR0 = data;
+}
+
+bool can_read()
+{
+	return ((UCSR0A & (1 << RXC0)));
+}
+
+bool can_write()
+{
+	return (UCSR0A & (1 << UDRE0));
 }
