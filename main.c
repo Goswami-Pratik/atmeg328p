@@ -23,6 +23,8 @@ int main(void)
 	TIMER_init();
 	USART_init();
 
+	//data direction register
+
 	DDRD = 0b00000100;	// Port D2 
 	PORTD = 0b00000000; // Turn LED off
 
